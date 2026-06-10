@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14-Story Project Inventory</title>
+    <style>
+        :root {
+            --primary: #2b3e50;
+            --accent: #f39c12;
+            --light: #f8f9fa;
+            --dark: #333;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active {
+            background-color: #d68502;
+        }
+
+        /* Inventory List Styling */
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-details h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            background: #e1e8ed;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            width: 35px;
+            height: 35px;
+            padding: 0;
+            background-color: var(--primary);
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+
+        .qty-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .low-stock {
+            color: var(--danger);
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏗️ Floor-by-Floor Inventory</h1>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h3>Add New Material</h3>
+            <div class="form-group">
+                <label for="matName">Material Name</label>
+                <input type="text" id="matName" placeholder="e.g., Drywall Sheets">
+            </div>
+            <div class="form-group">
+                <label for="matFloor">Target Floor</label>
+                <select id="matFloor">
+                    <option value="Ground">Ground Floor</option>
+                    <script>
+                        for(let i=1; i<=14; i++) {
+                            document.write(`<option value="Floor ${i}">Floor ${i}</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="matQty">Initial Quantity</label>
+                <input type="number" id="matQty" value="0" min="0">
+            </div>
+            <button onclick="addItem()">Add to Inventory</button>
+        </div>
+
+        <div class="card">
+            <h3>Current Stock</h3>
+            <div id="inventoryList">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Core Logic: Load data from LocalStorage or start empty
+        let inventory = JSON.parse(localStorage.getItem('constructionInventory')) || [];
+
+        // Function to save data to local storage
+        function saveToStorage() {
+            localStorage.setItem('constructionInventory', JSON.stringify(inventory));
+            renderInventory();
+        }
+
+        // Function to add a new item
+        function addItem() {
+            const nameInput = document.getElementById('matName');
+            const floorInput = document.getElementById('matFloor');
+            const qtyInput = document.getElementById('matQty');
+
+            if (nameInput.value.trim() === "") {
+                alert("Please enter a material name.");
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                name: nameInput.value,
+                floor: floorInput.value,
+                qty: parseInt(qtyInput.value) || 0
+            };
+
+            inventory.push(newItem);
+            saveToStorage();
+
+            // Clear inputs
+            nameInput.value = "";
+            qtyInput.value = "0";
+        }
+
+        // Function to adjust quantity (+ or -)
+        function changeQty(id, change) {
+            const item = inventory.find(i => i.id === id);
+            if (item) {
+                item.qty = Math.max(0, item.qty + change); // Prevents negative inventory
+                saveToStorage();
+            }
+        }
+
+        // Function to render the list to the screen
+        function renderInventory() {
+            const listContainer = document.getElementById('inventoryList');
+            
+            if (inventory.length === 0) {
+                listContainer.innerHTML = "<p style='color:#666;'>No items added yet.</p>";
+                return;
+            }
+
+            // Sort items by floor number for organization
+            inventory.sort((a, b) => a.floor.localeCompare(b.floor, undefined, {numeric: true, sensitivity: 'base'}));
+
+            listContainer.innerHTML = "";
+            inventory.forEach(item => {
+                const isLow = item.qty < 5 ? `<div class="low-stock">⚠️ Low Stock</div>` : '';
+                
+                listContainer.innerHTML += `
+                    <div class="item-row">
+                        <div class="item-details">
+                            <h3>${item.name}</h3>
+                            <span class="badge">${item.floor}</span>
+                            ${isLow}
+                        </div>
+                        <div class="controls">
+                            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                            <span class="qty-display">${item.qty}</span>
+                            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Initial render on page load
+        renderInventory();
+    </script>
+</body>
+</html>
