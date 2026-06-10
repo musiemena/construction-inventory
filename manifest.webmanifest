@@ -1,0 +1,17 @@
+{
+  "name": "14 Story Inventory Tracker",
+  "short_name": "Inventory",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f6f4",
+  "theme_color": "#215c5c",
+  "description": "Mobile-friendly inventory tracker for a 14 story building project.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
