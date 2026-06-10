@@ -1,319 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>14-Story Project Inventory</title>
-    <style>
-        :root {
-            --primary: #2b3e50;
-            --accent: #f39c12;
-            --light: #f8f9fa;
-            --dark: #333;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--light);
-            color: var(--dark);
-        }
-
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.4rem;
-        }
-
-        .container {
-            padding: 15px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-
-        button {
-            width: 100%;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:active {
-            background-color: #d68502;
-        }
-
-        /* Filter controls layout */
-        .filter-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        /* Inventory List Styling */
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .item-row:last-child {
-            border-bottom: none;
-        }
-
-        .item-details h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.1rem;
-        }
-
-        .badge {
-            background: #e1e8ed;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .qty-btn {
-            width: 35px;
-            height: 35px;
-            padding: 0;
-            background-color: var(--primary);
-            border-radius: 50%;
-            font-size: 1.2rem;
-        }
-
-        .qty-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .low-stock {
-            color: var(--danger);
-            font-weight: bold;
-            font-size: 0.8rem;
-            margin-top: 2px;
-        }
-
-        .delete-btn {
-            background: none;
-            color: #ccc;
-            border: none;
-            padding: 0 5px;
-            font-size: 1.1rem;
-            width: auto;
-            cursor: pointer;
-        }
-        .delete-btn:hover {
-            color: var(--danger);
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>🏗️ Floor-by-Floor Inventory</h1>
-    </header>
-
-    <div class="container">
-        <div class="card">
-            <h3>Add New Material</h3>
-            <div class="form-group">
-                <label for="matName">Material Name</label>
-                <input type="text" id="matName" placeholder="e.g., Drywall Sheets">
-            </div>
-            <div class="form-group">
-                <label for="matFloor">Target Floor</label>
-                <select id="matFloor">
-                    <option value="Ground">Ground Floor</option>
-                    <script>
-                        for(let i=1; i<=14; i++) {
-                            document.write(`<option value="Floor ${i}">Floor ${i}</option>`);
-                        }
-                    </script>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="matQty">Initial Quantity</label>
-                <input type="number" id="matQty" value="0" min="0">
-            </div>
-            <button onclick="addItem()">Add to Inventory</button>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#215c5c">
+    <title>14 Story Inventory Tracker</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Building project</p>
+          <h1>Inventory Tracker</h1>
         </div>
-
-        <div class="filter-section">
-            <div>
-                <label for="viewFloor">Filter by Floor</label>
-                <select id="viewFloor" onchange="renderInventory()">
-                    <option value="All">All Floors</option>
-                    <option value="Ground">Ground Floor</option>
-                    <script>
-                        for(let i=1; i<=14; i++) {
-                            document.write(`<option value="Floor ${i}">Floor ${i}</option>`);
-                        }
-                    </script>
-                </select>
-            </div>
-            <div>
-                <label for="searchBar">Search Material</label>
-                <input type="text" id="searchBar" placeholder="e.g., Rebar" oninput="renderInventory()">
-            </div>
+        <div class="top-actions">
+          <button class="icon-button" id="backupBtn" type="button" title="Download backup" aria-label="Download backup">BK</button>
+          <button class="icon-button" id="exportCsvBtn" type="button" title="Export CSV" aria-label="Export CSV">CSV</button>
         </div>
+      </header>
 
-        <div class="card">
-            <h3>Current Stock</h3>
-            <div id="inventoryList">
+      <main>
+        <section class="summary-band" aria-label="Inventory summary">
+          <div>
+            <span class="metric" id="totalItems">0</span>
+            <span class="label">items</span>
+          </div>
+          <div>
+            <span class="metric" id="lowStock">0</span>
+            <span class="label">low stock</span>
+          </div>
+          <div>
+            <span class="metric" id="installedItems">0</span>
+            <span class="label">installed</span>
+          </div>
+          <div>
+            <span class="metric" id="totalValue">$0</span>
+            <span class="label">value</span>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <aside class="floor-panel" aria-label="Floor progress">
+            <div class="section-title">
+              <h2>Floors</h2>
+              <span id="activeFloorLabel">All floors</span>
+            </div>
+            <div class="tower-visual" id="towerVisual" aria-label="14 story building floor selector"></div>
+          </aside>
+
+          <section class="inventory-panel">
+            <div class="tabs" role="tablist" aria-label="Inventory views">
+              <button class="tab active" data-view="items" type="button">Items</button>
+              <button class="tab" data-view="add" type="button">Add</button>
+              <button class="tab" data-view="backup" type="button">Backup</button>
+            </div>
+
+            <div class="view active" id="itemsView">
+              <div class="filters" aria-label="Inventory filters">
+                <label>
+                  Search
+                  <input id="searchInput" type="search" placeholder="Cement, pipe, cable...">
+                </label>
+                <label>
+                  Category
+                  <select id="categoryFilter">
+                    <option value="">All categories</option>
+                  </select>
+                </label>
+                <label>
+                  Status
+                  <select id="statusFilter">
+                    <option value="">All statuses</option>
+                    <option value="Ordered">Ordered</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Stored">Stored</option>
+                    <option value="In use">In use</option>
+                    <option value="Installed">Installed</option>
+                    <option value="Damaged">Damaged</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="item-list" id="itemList" aria-live="polite"></div>
+              <p class="empty-state" id="emptyState">No items match the current filters.</p>
+            </div>
+
+            <div class="view" id="addView">
+              <form id="itemForm" class="item-form">
+                <input type="hidden" id="itemId">
+                <div class="form-grid">
+                  <label>
+                    Item name
+                    <input id="nameInput" required placeholder="Rebar, cement, conduit...">
+                  </label>
+                  <label>
+                    Category
+                    <select id="categoryInput" required>
+                      <option value="Concrete">Concrete</option>
+                      <option value="Steel">Steel</option>
+                      <option value="Masonry">Masonry</option>
+                      <option value="Electrical">Electrical</option>
+                      <option value="Plumbing">Plumbing</option>
+                      <option value="HVAC">HVAC</option>
+                      <option value="Finishes">Finishes</option>
+                      <option value="Safety">Safety</option>
+                      <option value="Tools">Tools</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </label>
+                  <label>
+                    Floor
+                    <select id="floorInput" required></select>
+                  </label>
+                  <label>
+                    Status
+                    <select id="statusInput" required>
+                      <option>Ordered</option>
+                      <option>Delivered</option>
+                      <option>Stored</option>
+                      <option>In use</option>
+                      <option>Installed</option>
+                      <option>Damaged</option>
+                    </select>
+                  </label>
+                  <label>
+                    Quantity
+                    <input id="quantityInput" required type="number" min="0" step="0.01" value="1">
+                  </label>
+                  <label>
+                    Unit
+                    <input id="unitInput" required placeholder="bags, pcs, m, rolls">
+                  </label>
+                  <label>
+                    Minimum stock
+                    <input id="minimumInput" type="number" min="0" step="0.01" value="0">
+                  </label>
+                  <label>
+                    Unit cost
+                    <input id="costInput" type="number" min="0" step="0.01" value="0">
+                  </label>
+                  <label>
+                    Supplier
+                    <input id="supplierInput" placeholder="Supplier name">
+                  </label>
+                  <label>
+                    Location
+                    <input id="locationInput" placeholder="Basement store, floor 7 east...">
+                  </label>
                 </div>
-        </div>
+                <label>
+                  Notes
+                  <textarea id="notesInput" rows="3" placeholder="Delivery condition, batch number, next action..."></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="secondary" id="resetFormBtn" type="button">Clear</button>
+                  <button class="primary" type="submit">Save item</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="view" id="backupView">
+              <div class="backup-tools">
+                <div>
+                  <h2>Move Data Safely</h2>
+                  <p>Your inventory is saved in this browser. Use backup before changing phones or computers.</p>
+                </div>
+                <button class="primary" id="downloadJsonBtn" type="button">Download JSON backup</button>
+                <label class="file-control">
+                  Restore backup
+                  <input id="restoreInput" type="file" accept="application/json">
+                </label>
+                <button class="danger" id="clearDataBtn" type="button">Clear all data</button>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
     </div>
 
-    <script>
-        let inventory = JSON.parse(localStorage.getItem('constructionInventory')) || [];
+    <template id="itemTemplate">
+      <article class="item-card">
+        <div class="item-main">
+          <div>
+            <p class="category"></p>
+            <h3></h3>
+          </div>
+          <span class="status"></span>
+        </div>
+        <div class="item-details"></div>
+        <div class="item-notes"></div>
+        <div class="card-actions">
+          <button class="secondary edit-btn" type="button">Edit</button>
+          <button class="danger delete-btn" type="button">Delete</button>
+        </div>
+      </article>
+    </template>
 
-        function saveToStorage() {
-            localStorage.setItem('constructionInventory', JSON.stringify(inventory));
-            renderInventory();
-        }
-
-        function addItem() {
-            const nameInput = document.getElementById('matName');
-            const floorInput = document.getElementById('matFloor');
-            const qtyInput = document.getElementById('matQty');
-
-            if (nameInput.value.trim() === "") {
-                alert("Please enter a material name.");
-                return;
-            }
-
-            const newItem = {
-                id: Date.now(),
-                name: nameInput.value.trim(),
-                floor: floorInput.value,
-                qty: parseInt(qtyInput.value) || 0
-            };
-
-            inventory.push(newItem);
-            saveToStorage();
-
-            nameInput.value = "";
-            qtyInput.value = "0";
-        }
-
-        function changeQty(id, change) {
-            const item = inventory.find(i => i.id === id);
-            if (item) {
-                item.qty = Math.max(0, item.qty + change);
-                saveToStorage();
-            }
-        }
-
-        function deleteItem(id) {
-            if(confirm("Are you sure you want to delete this item?")) {
-                inventory = inventory.filter(item => item.id !== id);
-                saveToStorage();
-            }
-        }
-
-        // Updated Render Function with Filtering and Searching Logic
-        function renderInventory() {
-            const listContainer = document.getElementById('inventoryList');
-            const floorFilter = document.getElementById('viewFloor').value;
-            const searchQuery = document.getElementById('searchBar').value.toLowerCase();
-            
-            // 1. Filter the data based on user selection
-            let filteredInventory = inventory.filter(item => {
-                const matchesFloor = (floorFilter === "All" || item.floor === floorFilter);
-                const matchesSearch = item.name.toLowerCase().includes(searchQuery);
-                return matchesFloor && matchesSearch;
-            });
-
-            if (filteredInventory.length === 0) {
-                listContainer.innerHTML = "<p style='color:#666;'>No materials found matching criteria.</p>";
-                return;
-            }
-
-            // 2. Sort by floor level
-            filteredInventory.sort((a, b) => a.floor.localeCompare(b.floor, undefined, {numeric: true, sensitivity: 'base'}));
-
-            // 3. Output to HTML
-            listContainer.innerHTML = "";
-            filteredInventory.forEach(item => {
-                const isLow = item.qty < 5 ? `<div class="low-stock">⚠️ Low Stock</div>` : '';
-                
-                listContainer.innerHTML += `
-                    <div class="item-row">
-                        <div class="item-details">
-                            <h3>${item.name}</h3>
-                            <span class="badge">${item.floor}</span>
-                            ${isLow}
-                        </div>
-                        <div class="controls">
-                            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
-                            <span class="qty-display">${item.qty}</span>
-                            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
-                            <button class="delete-btn" onclick="deleteItem(${item.id})">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        renderInventory();
-    </script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
